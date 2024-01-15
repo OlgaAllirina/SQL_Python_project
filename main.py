@@ -60,7 +60,7 @@ def new_client(conn, cur, name, last_name, email_client):
 def update_name(conn, cur, id_name, up_name):
     cur.execute("""
     UPDATE Clients_info SET thirst_name = %s,
-    WHERE client_id = %s RETURNING client_id, thirst_name; """, (up_name), (id_name))
+    WHERE client_id = %s RETURNING client_id, thirst_name; """, (up_name, id_name))
     result = cur.fetchone()
     print(f"Вы изменили имя в таблице на {result}.")
     conn.commit()
