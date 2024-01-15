@@ -13,7 +13,7 @@ def create_db(conn, cur):
     """)
     cur.execute("""
     CREATE TABLE IF NOT EXISTS Phone_numbers(
-        number SERIAL PRIMARY KEY,
+        number VARCHAR(11) PRIMARY KEY,
         client_id INTEGER REFERENCES Clients_info(client_id)
         );
     """)
@@ -57,8 +57,14 @@ def new_client(conn, cur, name, last_name, email_client):
 
 
 # Функция, позволяющая изменить данные о клиенте.
-def update_bd(conn, cur, id):
-    pass
+def update_name(conn, cur, id_name, up_name):
+    cur.execute("""
+    UPDATE Clients_info SET thirst_name = %s,
+    WHERE client_id = %s RETURNING client_id, thirst_name; """, (up_name), (id_name))
+    result = cur.fetchone()
+    print(f"Вы изменили имя в таблице на {result}.")
+    conn.commit()
+    return result
 
 
 if __name__ == '__main__':
@@ -73,31 +79,45 @@ if __name__ == '__main__':
             # создадим новую таблицу
             create_db(conn, cur)
             print("Новые таблицы для загрузки данных о клиенте созданы!")
+            # добавим нового клиента в таблицу
+            add_client = input("Справка: для выхода из программы введите - stop, для начала добавления клиентов - add ")
+            if add_client == "add":
+                while add_client != "stop":
+                    name = input("Введите имя клиента: ")
+                    last_name = input("Введите фамилию клиента: ")
+                    email_client = input("Введите почту клиента: ")
+                    new_client(conn, cur, name, last_name, email_client)
+                    # добавим телефон для существующего клиента
+                    try:
+                        phone_number = int(input("Введите номер телефона, который хотите добавить: "))
+                        id_new_client = int(input("Введите номер id: "))
+                    except ValueError:
+                        print("Внимание! Вы ввели некорректный номер!Номер телефона и id может содержать только числа.")
+                    add_phone(conn, cur, phone_number, id_new_client)
+                    add_client = input("Нажмите add для добавления следующего клиента, stop для выхода из программы:  ")
             # Справка
-            HELP = int(input(f"1 - Добавить нового клиента; 2 - Изменить данные о клиенте; 3 - Удалить клиента;\n"
-                             f" 4 - Найти клиента по его данным: имени, фамилии, email или телефону."))
-            if HELP == 1:
-                print("Давайте добавим нового клиента!")
-                name = input("Введите имя клиента: ")
-                last_name = input("Введите фамилию клиента: ")
-                email_client = input("Введите почту клиента: ")
-                # добавим нового клиента в таблицу
-                add_client = input("Справка: для выхода из программы введите - stop,\n"
-                                   " для начала добавления клиентов - add ")
-                if add_client == "add":
-                    while add_client != "stop":
-                        new_client(conn, cur, name, last_name, email_client)
-                        # добавим телефон для существующего клиента
-                        try:
-                            phone_number = int(input("Введите номер телефона, который хотите добавить: "))
-                            id_new_client = int(input("Введите номер id: "))
-                        except ValueError:
-                            print("Внимание! Вы ввели некорректный номер!\n"
-                                  " Номер телефона и id может содержать только числа.")
-                        add_phone(conn, cur, phone_number, id_new_client)
+            HELP = int(input(f" 1  - Изменить данные о клиенте; 2 - Удалить клиента;\n"
+                             f" 3 - Найти клиента по его данным: имени, фамилии, email или телефону."))
             # попробуем изменить данные о клиенте
-            if HELP == 2:
-                pass
+            if HELP == 1:
+                help_update = int(input("Для дальнейшей работы с программой, напишете цифру, \n"
+                                        "соответствующую критерию, по которому хотите обновить данные: \n"
+                                        "1 - изменить имя клиента, 2 - изменить фамилию клиента, \n"
+                                        "3 - изменить почту клиента, 4 - изменить номер телефона. "))
+                if help_update == 1:
+                    id_name = int(input("Введите id клиента: "))
+                    up_name = input("Введите новое имя: ")
+                    update_name(conn, cur, id_name, up_name)
+
+
+
+
+
+
+
+
+
+
     conn.close()
 
 
