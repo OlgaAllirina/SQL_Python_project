@@ -126,7 +126,12 @@ def delete_client(cur, conn, id_name):
 # Функция, позволяющая найти клиента по его данным: имени, фамилии, email или телефону.
 def find_name_client(conn, cur, name_in_table):
     cur.execute("""
-    """)
+    SELECT c.client_id, c.thirst_name, c.last_name, c.email, p.number FROM Client_info c
+    LEFT JOIN Phone_numbers p ON p.client_id = c.client_id
+    WHERE c.thirst_name = %s;""", (name_in_table, ))
+    pprint(cur.fetchall())
+    conn.commit()
+    return name_in_table
 
 
 if __name__ == '__main__':
@@ -196,7 +201,7 @@ if __name__ == '__main__':
                                         "3 - найти клиента по почте, 4 - найти клиента по номеру телефона."))
                 if find_client == 1:
                     name_in_table = input("Введите имя клиента: ")
-                    pass
+                    find_name_client(conn, cur, name_in_table)
 
     conn.close()
 
