@@ -56,15 +56,45 @@ def new_client(conn, cur, name, last_name, email_client):
     return id
 
 
-# Функция, позволяющая изменить данные о клиенте.
+# Функции, позволяющая изменить данные о клиенте.
 def update_name(conn, cur, id_name, up_name):
     cur.execute("""
-    UPDATE Clients_info SET thirst_name = %s,
+    UPDATE Clients_info SET thirst_name = %s
     WHERE client_id = %s RETURNING client_id, thirst_name; """, (up_name, id_name))
     result = cur.fetchone()
     print(f"Вы изменили имя в таблице на {result}.")
     conn.commit()
     return result
+
+
+def update_last_name(conn, cur, id_name, up_last_name):
+    cur.execute("""
+        UPDATE Clients_info SET last_name = %s
+        WHERE client_id = %s RETURNING client_id, last_name; """, (up_last_name, id_name))
+    result = cur.fetchone()
+    print(f"Вы изменили имя в таблице на {result[1]}.")
+    conn.commit()
+    return result[1]
+
+
+def update_email(conn, cur, id_name, up_email):
+    cur.execute("""
+            UPDATE Clients_info SET last_name = %s
+            WHERE client_id = %s RETURNING client_id, email; """, (up_email, id_name))
+    result = cur.fetchone()
+    print(f"Вы изменили имя в таблице на {result[2]}.")
+    conn.commit()
+    return result[2]
+
+
+def update_phone(conn, cur, id_name, up_phone):
+    cur.execute("""
+            UPDATE Phone_numbers SET number = %s
+            WHERE client_id = %s RETURNING client_id, number; """, (up_phone, id_name))
+    result = cur.fetchone()
+    print(f"Вы изменили имя в таблице на {result[1]}.")
+    conn.commit()
+    return result[1]
 
 
 if __name__ == '__main__':
@@ -108,15 +138,18 @@ if __name__ == '__main__':
                     id_name = int(input("Введите id клиента: "))
                     up_name = input("Введите новое имя: ")
                     update_name(conn, cur, id_name, up_name)
-
-
-
-
-
-
-
-
-
+                elif help_update == 2:
+                    id_name = int(input("Введите id клиента: "))
+                    up_last_name = input("Введите новую фамилию клиента: ")
+                    update_last_name(conn, cur, id_name, up_last_name)
+                elif help_update == 3:
+                    id_name = int(input("Введите id клиента: "))
+                    up_email = input("Введите новый email клиента: ")
+                    update_email(conn, cur, id_name, up_email)
+                elif help_update == 4:
+                    id_name = int(input("Введите id клиента: "))
+                    up_phone = input("Введите новый телефон клиента: ")
+                    update_phone(conn, cur, id_name, up_phone)
 
     conn.close()
 
