@@ -1,4 +1,5 @@
 import psycopg2
+from pprint import pprint
 
 
 # Функция, создающая структуру базы данных(таблицы).
@@ -72,7 +73,7 @@ def update_last_name(conn, cur, id_name, up_last_name):
         UPDATE Clients_info SET last_name = %s
         WHERE client_id = %s RETURNING client_id, last_name; """, (up_last_name, id_name))
     result = cur.fetchone()
-    print(f"Вы изменили имя в таблице на {result[1]}.")
+    print(f"Вы изменили фамилию в таблице на {result[1]}.")
     conn.commit()
     return result[1]
 
@@ -82,7 +83,7 @@ def update_email(conn, cur, id_name, up_email):
             UPDATE Clients_info SET last_name = %s
             WHERE client_id = %s RETURNING client_id, email; """, (up_email, id_name))
     result = cur.fetchone()
-    print(f"Вы изменили имя в таблице на {result[2]}.")
+    print(f"Вы изменили почту в таблице на {result[2]}.")
     conn.commit()
     return result[2]
 
@@ -91,10 +92,41 @@ def update_phone(conn, cur, id_name, up_phone):
     cur.execute("""
             UPDATE Phone_numbers SET number = %s
             WHERE client_id = %s RETURNING client_id, number; """, (up_phone, id_name))
-    result = cur.fetchone()
-    print(f"Вы изменили имя в таблице на {result[1]}.")
+    result_1 = cur.fetchone()
+    print(f"Вы изменили телефон в таблице на {result_1}.")
     conn.commit()
-    return result[1]
+    return result_1
+
+
+# Функция, позволяющая удалить телефон для существующего клиента.
+def delete_phone(conn, cur, delite_num, id_name):
+    cur.execute("""
+    DELETE FROM Phone_numbers 
+        WHERE number = %s AND client_id = %s;
+        """, (delite_num, id_name))
+    print("Готово!")
+    conn.commit()
+    return delite_num, id_name
+
+
+# Функция, позволяющая удалить существующего клиента.
+def delete_client(cur, conn, id_name):
+    cur.execute("""
+    DELETE FROM Phone_numbers 
+        WHERE client_id = %s;
+        """, (id_name, ))
+    cur.execute("""
+    DELETE FROM Clients_info 
+        WHERE client_id = %s;
+        """, (id_name, ))
+    conn.commit()
+    return id_name
+
+
+# Функция, позволяющая найти клиента по его данным: имени, фамилии, email или телефону.
+def find_name_client(conn, cur, name_in_table):
+    cur.execute("""
+    """)
 
 
 if __name__ == '__main__':
@@ -126,8 +158,8 @@ if __name__ == '__main__':
                     add_phone(conn, cur, phone_number, id_new_client)
                     add_client = input("Нажмите add для добавления следующего клиента, stop для выхода из программы:  ")
             # Справка
-            HELP = int(input(f" 1  - Изменить данные о клиенте; 2 - Удалить клиента;\n"
-                             f" 3 - Найти клиента по его данным: имени, фамилии, email или телефону."))
+            HELP = int(input(f" 1  - Изменить данные о клиенте; 2 - Удалить телефон клиента; 3 - удалить клиента;\n"
+                             f" 4 - Найти клиента по его данным: имени, фамилии, email или телефону."))
             # попробуем изменить данные о клиенте
             if HELP == 1:
                 help_update = int(input("Для дальнейшей работы с программой, напишете цифру, \n"
@@ -150,6 +182,21 @@ if __name__ == '__main__':
                     id_name = int(input("Введите id клиента: "))
                     up_phone = input("Введите новый телефон клиента: ")
                     update_phone(conn, cur, id_name, up_phone)
+            elif HELP == 2:
+                delite_num = input("Введите номер клиента: ")
+                id_name = int(input("Введите id клиента: "))
+                delete_phone(conn, cur, delite_num, id_name)
+            elif HELP == 3:
+                id_name = int(input("Введите id клиента: "))
+                delete_client(cur, conn, id_name)
+            elif HELP == 4:
+                find_client = int(input("Для дальнейшей работы с программой, напишете цифру, \n"
+                                        "соответствующую критерию, по которому хотите обновить данные: \n"
+                                        "1 - найти клиента по имени, 2 - найти клиента по фамилии, \n"
+                                        "3 - найти клиента по почте, 4 - найти клиента по номеру телефона."))
+                if find_client == 1:
+                    name_in_table = input("Введите имя клиента: ")
+                    pass
 
     conn.close()
 
@@ -161,9 +208,9 @@ if __name__ == '__main__':
 
 
 
-#Функция, позволяющая удалить телефон для существующего клиента.
-#Функция, позволяющая удалить существующего клиента.
-#Функция, позволяющая найти клиента по его данным: имени, фамилии, email или телефону.
+
+
+
 
 
 
