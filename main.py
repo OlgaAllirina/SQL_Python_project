@@ -57,6 +57,15 @@ def new_client(conn, cur, name, last_name, email_client):
     return id
 
 
+def show_table(conn, cur):
+    cur.execute("""
+    SELECT * FROM Clients_info ci
+    JOIN Phone_numbers pn ON ci.client_id = pn.client_id;""")
+    pprint(cur.fetchall())
+    conn.commit()
+    return cur.fetchall()
+
+
 # Функции, позволяющая изменить данные о клиенте.
 def update_name(conn, cur, id_name, up_name):
     cur.execute("""
@@ -120,18 +129,64 @@ def delete_client(cur, conn, id_name):
         WHERE client_id = %s;
         """, (id_name, ))
     conn.commit()
+    print(f"Вы удалили клиента {id_name} из таблицы.")
     return id_name
 
 
-# Функция, позволяющая найти клиента по его данным: имени, фамилии, email или телефону.
+# Функции, позволяющая найти клиента по его данным: имени, фамилии, email или телефону:
+# Функция, позволяющая найти клиента по его имени
 def find_name_client(conn, cur, name_in_table):
     cur.execute("""
-    SELECT c.client_id, c.thirst_name, c.last_name, c.email, p.number FROM Client_info c
-    LEFT JOIN Phone_numbers p ON p.client_id = c.client_id
-    WHERE c.thirst_name = %s;""", (name_in_table, ))
-    pprint(cur.fetchall())
+    SELECT * FROM Clients_info ci
+    JOIN Phone_numbers pn ON ci.client_id = pn.client_id
+    WHERE thirst_name = %s;""", (name_in_table, ))
+    print(cur.fetchone())
     conn.commit()
     return name_in_table
+
+
+# Функция, позволяющая найти клиента по его фамилии
+def find_lastname_client(conn, cur, lastname_in_table):
+    cur.execute("""
+    SELECT * FROM Clients_info ci
+    JOIN Phone_numbers pn ON ci.client_id = pn.client_id
+    WHERE last_name = %s;""", (lastname_in_table, ))
+    print(cur.fetchone())
+    conn.commit()
+    return lastname_in_table
+
+
+# Функция, позволяющая найти клиента по его почте
+def find_email_client(conn, cur, email_in_table):
+    cur.execute("""
+    SELECT * FROM Clients_info ci
+    JOIN Phone_numbers pn ON ci.client_id = pn.client_id
+    WHERE email = %s;""", (email_in_table, ))
+    print(cur.fetchone())
+    conn.commit()
+    return email_in_table
+
+
+# Функция, позволяющая найти клиента по номеру его телефона
+def find_phone_client(conn, cur, phone_in_table):
+    cur.execute("""
+    SELECT * FROM Clients_info ci
+    JOIN Phone_numbers pn ON ci.client_id = pn.client_id
+    WHERE number = %s;""", (phone_in_table, ))
+    print(cur.fetchone())
+    conn.commit()
+    return phone_in_table
+
+
+# Функция, позволяющая найти клиента по id
+def find_id_client(conn, cur, id_in_table):
+    cur.execute("""
+        SELECT * FROM Clients_info ci
+        JOIN Phone_numbers pn ON ci.client_id = pn.client_id
+        WHERE client_id = %s;""", (id_in_table,))
+    print(cur.fetchone())
+    conn.commit()
+    return id_in_table
 
 
 if __name__ == '__main__':
@@ -154,10 +209,12 @@ if __name__ == '__main__':
                     last_name = input("Введите фамилию клиента: ")
                     email_client = input("Введите почту клиента: ")
                     new_client(conn, cur, name, last_name, email_client)
+                    show_table(conn, cur)
                     # добавим телефон для существующего клиента
                     try:
+                        id_new_client = int(input("Введите номер id клиента,\n "
+                                                  "для которого хотите добавить номер телефона: "))
                         phone_number = int(input("Введите номер телефона, который хотите добавить: "))
-                        id_new_client = int(input("Введите номер id: "))
                     except ValueError:
                         print("Внимание! Вы ввели некорректный номер!Номер телефона и id может содержать только числа.")
                     add_phone(conn, cur, phone_number, id_new_client)
@@ -194,15 +251,32 @@ if __name__ == '__main__':
             elif HELP == 3:
                 id_name = int(input("Введите id клиента: "))
                 delete_client(cur, conn, id_name)
+                show_table(conn, cur)
             elif HELP == 4:
-                find_client = int(input("Для дальнейшей работы с программой, напишете цифру, \n"
-                                        "соответствующую критерию, по которому хотите обновить данные: \n"
-                                        "1 - найти клиента по имени, 2 - найти клиента по фамилии, \n"
-                                        "3 - найти клиента по почте, 4 - найти клиента по номеру телефона."))
-                if find_client == 1:
-                    name_in_table = input("Введите имя клиента: ")
-                    find_name_client(conn, cur, name_in_table)
-
+                find_client = input(
+                    "Справка: для выхода из программы введите - stop, для начала поиска клиентов - add ")
+                if find_client == "add":
+                    while find_client != "stop":
+                        find_client = int(input("Для дальнейшей работы с программой, напишете цифру, \n"
+                                                "соответствующую критерию, по которому хотите обновить данные: \n"
+                                                "1 - найти клиента по имени, 2 - найти клиента по фамилии, \n"
+                                                "3 - найти клиента по почте, 4 - найти клиента по номеру телефона, \n"
+                                                "5 - найти по идентификатору id."))
+                        if find_client == 1:
+                            name_in_table = input("Введите имя клиента: ")
+                            find_name_client(conn, cur, name_in_table)
+                        elif find_client == 2:
+                            lastname_in_table = input("Введите фамилию клиента: ")
+                            find_lastname_client(conn, cur, lastname_in_table)
+                        elif find_client == 3:
+                            email_in_table = input("Введите фамилию клиента: ")
+                            find_email_client(conn, cur, email_in_table)
+                        elif find_client == 4:
+                            phone_in_table = input("Введите телефон клиента: ")
+                            find_phone_client(conn, cur, phone_in_table)
+                        elif find_client == 5:
+                            id_in_table = input("Введите индивидуальный идентификатор клиента(id): ")
+                            find_id_client(conn, cur, id_in_table)
     conn.close()
 
 
